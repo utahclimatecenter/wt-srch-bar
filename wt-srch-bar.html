@@ -1,0 +1,326 @@
+<link rel="import" href="../polymer/polymer.html">
+<link rel="import" href="../iron-ajax/iron-ajax.html">
+<link rel="import" href="../paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../paper-input/paper-input.html">
+<link rel="import" href="../paper-button/paper-button.html">
+<link rel="import" href="../iron-form/iron-form.html">
+<link rel="import" href="../iron-icon/iron-icon.html">
+<link rel="import" href="../iron-icons/iron-icons.html">
+<link rel="import" href="../vaadin-date-picker/vaadin-date-picker.html">
+
+<link rel="import" href="../wt-bootstrap-styles/wt-bootstrap-styles.html">
+<link rel="import" href="../wt-master-slave-combo/wt-master-slave-combo.html">
+
+
+<!--
+`<my-station>` Shows the vaadin grid in action with iron-ajax against the climate api.
+In typical use, just slap some `<my-station>` anywhere you would like to put it.
+      <my-station></my-station>
+Wham! It's all awesome now!
+
+@demo /web-components/drawer-app/#/station/list  Super cool demo!!
+-->
+<dom-module id="wt-srch-bar">
+  <template>
+    <style include="bootstrap-styles">
+      :host {
+        display: block;
+
+        padding: 10px;
+      }
+
+      paper-tab {
+        background-color: #e6e6e6;
+      }
+
+      green {
+        color: #00ff00;
+      }
+
+      .hide {
+        display: none;
+      }
+
+      [upside-down] {
+        transform: rotate(180deg);
+      }
+
+      paper-icon-button {
+        width: 25px;
+        height: 25px;
+        transition: transform .5s cubic-bezier(.4, 0, .2, 1);
+      }
+
+    </style>
+
+    <iron-ajax
+    auto
+    id="Schedules"
+    url="{{url}}"
+    bubbles="true"
+    headers='{"X-Requested-With": "XMLHttpRequest"}'
+    handle-as="json"
+    headers='{"Cache-control": "no-cache"}'
+    on-response="_handleResponse";
+    last-response="{{schedules}}"></iron-ajax>
+
+    <iron-form id="wt-srch-bar-form">
+        <form method="get">
+        <div class="row">
+            <div class="col-sm-1">
+            </div>
+            <div class="col-sm-10">
+                <div style="display:inline-flex;">
+                <div id="default-search-block"></div>
+                <paper-input name="srch" id="srch" label="Filter Search">
+                    <iron-icon icon="search" id="srch-icon" slot="prefix"></iron-icon>
+                </paper-input>
+                <paper-icon-button id="add-button" icon="icons:add-circle" title="Add Filter" style="margin-top: 30px; color: green"></paper-icon-button>
+                </div>
+                <div id="srch-block"></div>
+            </div>
+            <div class="col-sm-1">
+            </div>
+        </div>
+        <div id="add-remove-block"></div>
+
+        </form>
+    </iron-form>
+
+
+  </template>
+  <script>
+    /**
+     * @customElement
+     * @polymer
+     */
+    class WtSrchBar extends Polymer.Element {
+      static get is() { return 'wt-srch-bar'; }
+
+      static get properties() {
+        return {
+            filterTypesUrl: String,
+            searchLabel: String,
+            hideFilter: {
+              type: Boolean,
+              value: false
+            },
+            noTextSearch: {
+              type: Boolean,
+              value: false
+            },
+            defaultSrch: {
+                type: String,
+                value: "free-text"
+            },
+            startDate: {
+                type: String
+            },
+            endDate: {
+                type: String
+            }
+        };
+      }
+
+        // Element class can define custom element reactions
+        connectedCallback() {
+            super.connectedCallback();
+            var me = this;
+            var srchField = Polymer.dom(this.root).querySelector('#srch');
+            var srchIcon = Polymer.dom(this.root).querySelector('#srch-icon');
+            var srchBlock= Polymer.dom(this.root).querySelector('#srch-block');
+            var defaultSrchBlock= Polymer.dom(this.root).querySelector('#default-search-block');
+            var removeBtn = Polymer.dom(this.root).querySelector('#remove-button');
+            var form = Polymer.dom(this.root).querySelector('#wt-srch-bar-form');
+            var addBtn = Polymer.dom(this.root).querySelector('#add-button');
+            var filterBtn = Polymer.dom(this.root).querySelector('#filter-button');
+
+            this.getValue = function () {
+                return srchField.value;
+            }
+
+            if (me.defaultSrch == "as-of-date") {
+              var datePicker = document.createElement('vaadin-date-picker');
+              datePicker.label = "As of Date:";
+              datePicker.id = "as_of_date";
+              datePicker.name = "as_of_date";
+              defaultSrchBlock.appendChild(datePicker);
+              srchField.hidden = true;
+              datePicker.addEventListener('value-changed', function(e) {
+                var form = Polymer.dom(me.root).querySelector('#wt-srch-bar-form');
+                var formData = form.serializeForm();
+
+                me.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
+                  bubbles: true,
+                  composed: true,
+                  formData: formData,
+                  detail: {
+                    target: me._target,
+                    formData: formData
+                  }
+                }));
+              });
+
+              setTimeout(function(){
+                if (typeof me.startDate == 'undefined') {
+                    var now = new Date();
+                } else {
+                    var now = new Date(me.startDate);
+                }
+                var formattedDate = now.getFullYear()+"-"
+                    +("0"+(now.getMonth()+1)).slice(-2)+"-"
+                    +("0" + now.getDate()).slice(-2);
+                datePicker.value = formattedDate;
+               }, 100);
+
+            } else if (me.defaultSrch == "between-date") {
+              var datePicker = document.createElement('vaadin-date-picker');
+              datePicker.label = "Start Date:";
+              datePicker.id = "start_date";
+              datePicker.name = "start_date";
+              defaultSrchBlock.appendChild(datePicker);
+              var datePicker2 = document.createElement('vaadin-date-picker');
+              datePicker2.label = "End Date:";
+              datePicker2.id = "end_date";
+              datePicker2.name = "end_date";
+              defaultSrchBlock.appendChild(datePicker2);
+              srchField.hidden = true;
+
+              datePicker.addEventListener('value-changed', function(e) {
+                var form = Polymer.dom(me.root).querySelector('#wt-srch-bar-form');
+                var formData = form.serializeForm();
+
+                me.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
+                  bubbles: true,
+                  composed: true,
+                  formData: formData,
+                  detail: {
+                    target: me._target,
+                    formData: formData
+                  }
+                }));
+              });
+
+              datePicker2.addEventListener('value-changed', function(e) {
+                var form = Polymer.dom(me.root).querySelector('#wt-srch-bar-form');
+                var formData = form.serializeForm();
+
+                me.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
+                  bubbles: true,
+                  composed: true,
+                  formData: formData,
+                  detail: {
+                    target: me._target,
+                    formData: formData
+                  }
+                }));
+              });
+
+              setTimeout(function() {
+                if (typeof me.startDate == 'undefined') {
+                    var start = new Date();
+                    start.setDate(start.getDate() - 150);
+                } else {
+                    var start = new Date(me.startDate);
+                }
+
+                if (typeof me.endDate == 'undefined') {
+                    var today = new Date();
+                    today.setDate(today.getDate() + 1);
+                } else {
+                    var today = new Date(me.endDate);
+                }
+
+                var formattedDate = today.getFullYear()+"-"
+                    +("0"+(today.getMonth()+1)).slice(-2)+"-"
+                    +("0" + today.getDate()).slice(-2);
+                datePicker2.value = formattedDate;
+
+                var formattedDate2 = start.getFullYear()+"-"
+                    +("0"+(start.getMonth()+1)).slice(-2)+"-"
+                    +("0" + start.getDate()).slice(-2);
+                datePicker.value = formattedDate2;
+               }, 100);
+
+            }
+
+            srchField.addEventListener('keyup', function(e) {
+                this.fire('main-srch-field-changed', {
+                    mainSrchField: srchField.$.input.bindValue
+                });
+            });
+
+            if ( !me.hideFilter ) {
+                addBtn.addEventListener('click',function(e) {
+                  me._addFilter();
+                });
+            } else {
+                // filterBtn.hidden = true;
+                addBtn.hidden = true;
+            }
+
+            this.addEventListener('wt-slave-combo-remove',function(e){
+              var me = this;
+              e.detail.target.remove();
+              var form = Polymer.dom(this.root).querySelector('#wt-srch-bar-form');
+              var formData = form.serializeForm();
+
+              this.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
+                  bubbles: true,
+                  composed: true,
+                  formData: formData,
+                  detail: {
+                    target: this._target,
+                    formData: formData
+                  }
+                }));
+            });
+
+            this.addEventListener('wt-slave-combo-changed', function(e) {
+                var me = this;
+                var form = Polymer.dom(this.root).querySelector('#wt-srch-bar-form');
+                var formData = form.serializeForm();
+
+                console.log(e);
+
+                this.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
+                  bubbles: true,
+                  composed: true,
+                  formData: formData,
+                  detail: {
+                    target: this._target,
+                    formData: formData,
+                    item: e.target.selectedItem
+                  }
+                }));
+
+            });
+
+            this.addEventListener('wt-master-combo-changed', function(e) {
+            //console.log("MASTER CHANGED=",e.detail.value);
+            });
+        }
+
+        ready() {
+            super.ready();
+        }
+
+        _addFilter() {
+            var me = this;
+            var srchBlock= Polymer.dom(this.root).querySelector('#srch-block');
+            var addRemoveBlock= Polymer.dom(this.root).querySelector('#add-remove-block');
+            var addBtn = Polymer.dom(this.root).querySelector('#add-button');
+            var filterBtn = Polymer.dom(this.root).querySelector('#filter-button');
+
+            var masterSlaveCombo = document.createElement('wt-master-slave-combo');
+            masterSlaveCombo.masterSlaveUrl = me.filterTypesUrl;
+            masterSlaveCombo.masterLabel = "Filter List By";
+            masterSlaveCombo.slaveLabel = "";
+            srchBlock.appendChild(masterSlaveCombo);
+        }
+
+    }
+
+    window.customElements.define(WtSrchBar.is, WtSrchBar);
+  </script>
+</dom-module>
