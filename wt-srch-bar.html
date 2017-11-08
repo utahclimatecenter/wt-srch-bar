@@ -282,6 +282,7 @@ Wham! It's all awesome now!
                 var formData = form.serializeForm();
 
                 console.log(e);
+                console.log("FORM DATA",formData);
 
                 this.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
                   bubbles: true,
@@ -315,7 +316,7 @@ Wham! It's all awesome now!
             var masterSlaveCombo = document.createElement('wt-master-slave-combo');
             masterSlaveCombo.masterSlaveUrl = me.filterTypesUrl;
             masterSlaveCombo.masterLabel = "Filter List By";
-            masterSlaveCombo.slaveLabel = "";
+            masterSlaveCombo.slaveLabel = "Filter List By";
             srchBlock.appendChild(masterSlaveCombo);
         }
 
