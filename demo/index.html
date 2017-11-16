@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, minimum-scale=1, initial-scale=1, user-scalable=yes">
+
+    <title>wt-srch-bar demo</title>
+
+    <script src="../../webcomponentsjs/webcomponents-lite.js"></script>
+
+    <link rel="import" href="../../iron-demo-helpers/demo-pages-shared-styles.html">
+    <link rel="import" href="../../iron-demo-helpers/demo-snippet.html">
+    <link rel="import" href="../wt-srch-bar.html">
+
+    <custom-style>
+      <style is="custom-style" include="demo-pages-shared-styles">
+
+      .centered800 {
+        max-width: 800px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+      </style>
+    </custom-style>
+  </head>
+  <body>
+    <div class="vertical-section-container centered800">
+      <h3>Basic wt-srch-bar demo!</h3>
+      <demo-snippet>
+        <template>
+          <wt-srch-bar
+            search-label="Search"
+            default-srch="free-text"
+            filter-types-url="./data/master-combo.txt">
+          </wt-srch-bar>
+        </template>
+      </demo-snippet>
+    </div>
+    <div class="vertical-section-container centered800">
+      <h3>Basic wt-srch-bar demo!</h3>
+      <demo-snippet>
+        <template>
+          <wt-srch-bar
+            default-srch="between-date"
+            filter-types-url="./data/master-combo.txt">
+          </wt-srch-bar>
+        </template>
+      </demo-snippet>
+    </div>
+    <div class="vertical-section-container centered800">
+      <h3>Basic wt-srch-bar demo!</h3>
+      <demo-snippet>
+        <template>
+          <wt-srch-bar
+            default-srch="as-of-date"
+            filter-types-url="./data/master-combo.txt">
+          </wt-srch-bar>
+        </template>
+      </demo-snippet>
+    </div>
+  </body>
+</html>
