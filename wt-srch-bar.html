@@ -141,6 +141,7 @@ Wham! It's all awesome now!
 
             if (me.defaultSrch == "as-of-date") {
               var datePicker = document.createElement('vaadin-date-picker');
+              addBtn.style = "margin-top: 20px; color: green";
               datePicker.label = "As of Date:";
               datePicker.id = "as_of_date";
               datePicker.name = "as_of_date";
@@ -175,6 +176,7 @@ Wham! It's all awesome now!
 
             } else if (me.defaultSrch == "between-date") {
               var datePicker = document.createElement('vaadin-date-picker');
+              addBtn.style = "margin-top: 20px; color: green";
               datePicker.label = "Start Date:";
               datePicker.id = "start_date";
               datePicker.name = "start_date";
@@ -314,8 +316,9 @@ Wham! It's all awesome now!
             var filterBtn = Polymer.dom(this.root).querySelector('#filter-button');
 
             var masterSlaveCombo = document.createElement('wt-master-slave-combo');
-            masterSlaveCombo.masterSlaveUrl = me.filterTypesUrl;
+            masterSlaveCombo.masterUrl = me.filterTypesUrl;
             masterSlaveCombo.masterLabel = "Filter List By";
+            masterSlaveCombo.showRemoveIcon = "true";
             masterSlaveCombo.slaveLabel = "Filter List By";
             srchBlock.appendChild(masterSlaveCombo);
         }
