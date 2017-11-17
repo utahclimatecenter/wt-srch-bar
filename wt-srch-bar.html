@@ -192,6 +192,10 @@ Wham! It's all awesome now!
                 var form = Polymer.dom(me.root).querySelector('#wt-srch-bar-form');
                 var formData = form.serializeForm();
 
+                if (typeof formData.srch === 'undefined') {
+                  formData.srch = "";
+                }
+
                 me.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
                   bubbles: true,
                   composed: true,
@@ -247,9 +251,22 @@ Wham! It's all awesome now!
             }
 
             srchField.addEventListener('keyup', function(e) {
-                this.fire('main-srch-field-changed', {
-                    mainSrchField: srchField.$.input.bindValue
-                });
+              var form = Polymer.dom(me.root).querySelector('#wt-srch-bar-form');
+              var formData = form.serializeForm();
+
+              if (typeof formData.srch === 'undefined') {
+                formData.srch = "";
+              }
+
+              this.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
+                  bubbles: true,
+                  composed: true,
+                  formData: formData,
+                  detail: {
+                    target: me._target,
+                    formData: formData
+                  }
+                }));
             });
 
             if ( !me.hideFilter ) {
@@ -267,6 +284,10 @@ Wham! It's all awesome now!
               var form = Polymer.dom(this.root).querySelector('#wt-srch-bar-form');
               var formData = form.serializeForm();
 
+              if (typeof formData.srch === 'undefined') {
+                formData.srch = "";
+              }
+
               this.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
                   bubbles: true,
                   composed: true,
@@ -283,8 +304,9 @@ Wham! It's all awesome now!
                 var form = Polymer.dom(this.root).querySelector('#wt-srch-bar-form');
                 var formData = form.serializeForm();
 
-                console.log(e);
-                console.log("FORM DATA",formData);
+                if (typeof formData.srch === 'undefined') {
+                  formData.srch = "";
+                }
 
                 this.dispatchEvent(new CustomEvent('wt-srch-bar-changed', {
                   bubbles: true,
