@@ -102,8 +102,8 @@ Wham! It's all awesome now!
             filterTypesUrl: String,
             searchLabel: String,
             hideFilter: {
-              type: Boolean,
-              value: false
+              type: String,
+              value: "false"
             },
             noTextSearch: {
               type: Boolean,
@@ -269,7 +269,7 @@ Wham! It's all awesome now!
                 }));
             });
 
-            if ( !me.hideFilter ) {
+            if ( me.hideFilter == "false" ) {
                 addBtn.addEventListener('click',function(e) {
                   me._addFilter();
                 });
